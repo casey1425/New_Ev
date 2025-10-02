@@ -35,6 +35,7 @@
             panel_battery = new Panel();
             batteryControl1 = new New_Ev.BatteryControl();
             panel_log = new Panel();
+            logControl1 = new New_Ev.LogControl();
             menuStrip1 = new MenuStrip();
             파일FToolStripMenuItem = new ToolStripMenuItem();
             새시뮬레이션ToolStripMenuItem = new ToolStripMenuItem();
@@ -60,15 +61,16 @@
             splitContainer2.Panel2.SuspendLayout();
             splitContainer2.SuspendLayout();
             panel_battery.SuspendLayout();
+            panel_log.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
-            statusStrip1.Location = new Point(0, 525);
+            statusStrip1.Location = new Point(0, 682);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(846, 22);
+            statusStrip1.Size = new Size(1156, 22);
             statusStrip1.TabIndex = 0;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -86,8 +88,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(panel_log);
-            splitContainer1.Size = new Size(846, 525);
-            splitContainer1.SplitterDistance = 344;
+            splitContainer1.Size = new Size(1156, 682);
+            splitContainer1.SplitterDistance = 446;
             splitContainer1.TabIndex = 2;
             // 
             // splitContainer2
@@ -104,8 +106,8 @@
             // 
             splitContainer2.Panel2.Controls.Add(panel_battery);
             splitContainer2.Panel2.Paint += splitContainer2_Panel2_Paint;
-            splitContainer2.Size = new Size(846, 344);
-            splitContainer2.SplitterDistance = 281;
+            splitContainer2.Size = new Size(1156, 446);
+            splitContainer2.SplitterDistance = 383;
             splitContainer2.TabIndex = 0;
             // 
             // panel_tree
@@ -114,7 +116,7 @@
             panel_tree.Dock = DockStyle.Fill;
             panel_tree.Location = new Point(0, 0);
             panel_tree.Name = "panel_tree";
-            panel_tree.Size = new Size(281, 344);
+            panel_tree.Size = new Size(383, 446);
             panel_tree.TabIndex = 0;
             // 
             // panel_battery
@@ -124,7 +126,7 @@
             panel_battery.Dock = DockStyle.Fill;
             panel_battery.Location = new Point(0, 0);
             panel_battery.Name = "panel_battery";
-            panel_battery.Size = new Size(561, 344);
+            panel_battery.Size = new Size(769, 446);
             panel_battery.TabIndex = 0;
             // 
             // batteryControl1
@@ -132,16 +134,27 @@
             batteryControl1.Dock = DockStyle.Fill;
             batteryControl1.Location = new Point(0, 0);
             batteryControl1.Name = "batteryControl1";
-            batteryControl1.Size = new Size(561, 344);
+            batteryControl1.Size = new Size(769, 446);
             batteryControl1.TabIndex = 0;
+            batteryControl1.SimulationStarted += batteryControl1_SimulationStarted;
+            batteryControl1.SimulationStopped += batteryControl1_SimulationStopped;
             // 
             // panel_log
             // 
+            panel_log.Controls.Add(logControl1);
             panel_log.Dock = DockStyle.Fill;
             panel_log.Location = new Point(0, 0);
             panel_log.Name = "panel_log";
-            panel_log.Size = new Size(846, 177);
+            panel_log.Size = new Size(1156, 232);
             panel_log.TabIndex = 0;
+            // 
+            // logControl1
+            // 
+            logControl1.Dock = DockStyle.Fill;
+            logControl1.Location = new Point(0, 0);
+            logControl1.Name = "logControl1";
+            logControl1.Size = new Size(1156, 232);
+            logControl1.TabIndex = 0;
             // 
             // menuStrip1
             // 
@@ -150,7 +163,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { 파일FToolStripMenuItem, 편집EToolStripMenuItem, 보기FtoolStripMenuItem, 시뮬레이션SToolStripMenuItem, 도움말HtoolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(846, 28);
+            menuStrip1.Size = new Size(1156, 28);
             menuStrip1.TabIndex = 3;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -223,28 +236,28 @@
             // 시작ToolStripMenuItem
             // 
             시작ToolStripMenuItem.Name = "시작ToolStripMenuItem";
-            시작ToolStripMenuItem.Size = new Size(224, 26);
+            시작ToolStripMenuItem.Size = new Size(152, 26);
             시작ToolStripMenuItem.Text = "시작";
             시작ToolStripMenuItem.Click += 시작ToolStripMenuItem_Click;
             // 
             // 일시정지ToolStripMenuItem
             // 
             일시정지ToolStripMenuItem.Name = "일시정지ToolStripMenuItem";
-            일시정지ToolStripMenuItem.Size = new Size(224, 26);
+            일시정지ToolStripMenuItem.Size = new Size(152, 26);
             일시정지ToolStripMenuItem.Text = "일시정지";
             일시정지ToolStripMenuItem.Click += 일시정지ToolStripMenuItem_Click;
             // 
             // 중지ToolStripMenuItem
             // 
             중지ToolStripMenuItem.Name = "중지ToolStripMenuItem";
-            중지ToolStripMenuItem.Size = new Size(224, 26);
+            중지ToolStripMenuItem.Size = new Size(152, 26);
             중지ToolStripMenuItem.Text = "중지";
             중지ToolStripMenuItem.Click += 중지ToolStripMenuItem_Click;
             // 
             // 리셋ToolStripMenuItem
             // 
             리셋ToolStripMenuItem.Name = "리셋ToolStripMenuItem";
-            리셋ToolStripMenuItem.Size = new Size(224, 26);
+            리셋ToolStripMenuItem.Size = new Size(152, 26);
             리셋ToolStripMenuItem.Text = "리셋";
             리셋ToolStripMenuItem.Click += 리셋ToolStripMenuItem_Click;
             // 
@@ -258,7 +271,7 @@
             // 
             AutoScaleDimensions = new SizeF(9F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(846, 547);
+            ClientSize = new Size(1156, 704);
             Controls.Add(menuStrip1);
             Controls.Add(splitContainer1);
             Controls.Add(statusStrip1);
@@ -273,6 +286,7 @@
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
             panel_battery.ResumeLayout(false);
+            panel_log.ResumeLayout(false);
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);
@@ -304,5 +318,6 @@
         private ToolStripMenuItem 일시정지ToolStripMenuItem;
         private ToolStripMenuItem 중지ToolStripMenuItem;
         private ToolStripMenuItem 리셋ToolStripMenuItem;
+        private New_Ev.LogControl logControl1;
     }
 }

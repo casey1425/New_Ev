@@ -6,12 +6,9 @@ namespace Ev
     public partial class Form1 : Form
     {
 
-        private Form_Log logForm;
         public Form1()
         {
             InitializeComponent();
-            logForm = new Form_Log(); //logForm 인스턴스 생성
-            logForm.Show();
         }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
@@ -33,19 +30,19 @@ namespace Ev
         {
             batteryControl1.ResetSimulation();
             MessageBox.Show("초기화 완료!");
-            logForm.AddLog("새 시뮬레이션 시작");
+            logControl1?.AddLog("새 시뮬레이션 시작");
         }
 
         private void 시작ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             batteryControl1.StartSimulation();
-            logForm.AddLog("충전 시뮬레이션 시작");
+            logControl1?.AddLog("충전 시뮬레이션 시작");
         }
 
         private void 중지ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             batteryControl1.StopSimulation();
-            logForm.AddLog("충전 시뮬레이션 중지");
+            logControl1?.AddLog("충전 시뮬레이션 중지");
         }
 
         private void 저장ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -63,12 +60,12 @@ namespace Ev
                 {
                     System.IO.File.WriteAllText(saveFileDialog.FileName, settings);
                     MessageBox.Show("설정이 저장되었습니다.");
-                    logForm.AddLog("설정 파일 저장: " + saveFileDialog.FileName);
+                    logControl1.AddLog("설정 파일 저장: " + saveFileDialog.FileName);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("파일 저장 중 오류가 발생했습니다: " + ex.Message);
-                    logForm.AddLog("파일 저장 오류: " + ex.Message);
+                    logControl1.AddLog("파일 저장 오류: " + ex.Message);
                 }
             }
         }
@@ -81,14 +78,24 @@ namespace Ev
         private void 일시정지ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             batteryControl1.PauseSimulation();
-            logForm.AddLog("충전 시뮬레이션 일시정지");
+            logControl1?.AddLog("충전 시뮬레이션 일시정지");
         }
 
         private void 리셋ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             batteryControl1.ResetSimulation();
             MessageBox.Show("초기화 완료!");
-            logForm.AddLog("시뮬레이션 리셋");
+            logControl1?.AddLog("시뮬레이션 리셋");
+        }
+
+        private void batteryControl1_SimulationStarted(object sender, EventArgs e)
+        {
+            logControl1.AddLog("시뮬레이션 시작 버튼 클릭");
+        }
+
+        private void batteryControl1_SimulationStopped(object sender, EventArgs e)
+        {
+            logControl1.AddLog("시뮬레이션 종료 버튼 클릭");
         }
     }
 }
