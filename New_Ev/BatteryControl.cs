@@ -15,6 +15,7 @@ namespace New_Ev
         private ProgressBar progressBarSoc = null!;
         private System.Windows.Forms.Timer timer1 = null!;
         private Chart chart1 = null!; // 차트 변수 추가
+        private int tickCount = 0;
 
         // ----- 공개(Public) 이벤트 -----
         public event EventHandler SimulationStarted;
@@ -24,9 +25,11 @@ namespace New_Ev
         public BatteryControl()
         {
             InitializeComponent();
+            this.MinimumSize = new Size(340, 400);
+            this.Size = new Size(340, 400);
             myBattery = new Battery();
             InitializeControls();
-            InitializeChart(); // 차트 초기화 호출 추가
+            InitializeChart();
             UpdateUI();
         }
 
@@ -43,6 +46,7 @@ namespace New_Ev
             txtCurrent.Text = "50";
             UpdateUI();
             chart1.Series["SOC"].Points.Clear(); // 차트 데이터 초기화
+            tickCount = 0;
         }
         public string GetCurrentSettings()
         {
@@ -78,6 +82,8 @@ namespace New_Ev
 
             timer1 = new System.Windows.Forms.Timer() { Interval = 50 };
 
+            timer1 = new System.Windows.Forms.Timer() { Interval = 50 };
+
             btnStart.Click += new EventHandler(btnStart_Click);
             btnStop.Click += new EventHandler(btnStop_Click);
             timer1.Tick += new EventHandler(timer1_Tick);
@@ -91,7 +97,11 @@ namespace New_Ev
         // ----- 차트 초기화 -----
         private void InitializeChart()
         {
+            chart1.Series.Clear();
+            chart1.ChartAreas.Clear();
+
             var chartArea = new ChartArea("Default");
+
             chartArea.AxisY.Minimum = 0;
             chartArea.AxisY.Maximum = 100;
             chartArea.AxisY.Title = "SOC (%)";
@@ -99,6 +109,7 @@ namespace New_Ev
             chart1.ChartAreas.Add(chartArea);
 
             var socSeries = new Series("SOC");
+            socSeries.ChartArea = "Default";
             socSeries.ChartType = SeriesChartType.Line;
             socSeries.BorderWidth = 2;
             socSeries.Color = Color.Green;
@@ -132,9 +143,9 @@ namespace New_Ev
         {
             myBattery.TickSimulation();
             UpdateUI();
-
-            // 차트에 직접 데이터 추가
-            chart1.Series["SOC"].Points.AddY(myBattery.SocAsDouble);
+            tickCount++;
+            chart1.Series["SOC"].Points.AddXY(tickCount, myBattery.SocAsDouble);
+            chart1.ChartAreas["Default"].RecalculateAxesScale();
 
             if (myBattery.is_full)
             {
@@ -154,6 +165,14 @@ namespace New_Ev
             if (myBattery.SOC >= progressBarSoc.Minimum && myBattery.SOC <= progressBarSoc.Maximum)
             {
                 progressBarSoc.Value = myBattery.SOC;
+            }
+        }
+
+        private void BatteryControl_Load(object sender, EventArgs e)
+        {
+            if (chart1 != null)
+            {
+                chart1.Width = this.ClientSize.Width - 20;
             }
         }
     }

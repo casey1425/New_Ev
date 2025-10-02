@@ -68,9 +68,9 @@
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
-            statusStrip1.Location = new Point(0, 682);
+            statusStrip1.Location = new Point(0, 761);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(1156, 22);
+            statusStrip1.Size = new Size(1360, 22);
             statusStrip1.TabIndex = 0;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -88,8 +88,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(panel_log);
-            splitContainer1.Size = new Size(1156, 682);
-            splitContainer1.SplitterDistance = 446;
+            splitContainer1.Size = new Size(1360, 761);
+            splitContainer1.SplitterDistance = 556;
             splitContainer1.TabIndex = 2;
             // 
             // splitContainer2
@@ -106,8 +106,8 @@
             // 
             splitContainer2.Panel2.Controls.Add(panel_battery);
             splitContainer2.Panel2.Paint += splitContainer2_Panel2_Paint;
-            splitContainer2.Size = new Size(1156, 446);
-            splitContainer2.SplitterDistance = 383;
+            splitContainer2.Size = new Size(1360, 556);
+            splitContainer2.SplitterDistance = 450;
             splitContainer2.TabIndex = 0;
             // 
             // panel_tree
@@ -116,7 +116,7 @@
             panel_tree.Dock = DockStyle.Fill;
             panel_tree.Location = new Point(0, 0);
             panel_tree.Name = "panel_tree";
-            panel_tree.Size = new Size(383, 446);
+            panel_tree.Size = new Size(450, 556);
             panel_tree.TabIndex = 0;
             // 
             // panel_battery
@@ -126,15 +126,17 @@
             panel_battery.Dock = DockStyle.Fill;
             panel_battery.Location = new Point(0, 0);
             panel_battery.Name = "panel_battery";
-            panel_battery.Size = new Size(769, 446);
+            panel_battery.Size = new Size(906, 556);
             panel_battery.TabIndex = 0;
             // 
             // batteryControl1
             // 
+            batteryControl1.AutoScroll = true;
             batteryControl1.Dock = DockStyle.Fill;
             batteryControl1.Location = new Point(0, 0);
+            batteryControl1.MinimumSize = new Size(320, 400);
             batteryControl1.Name = "batteryControl1";
-            batteryControl1.Size = new Size(769, 446);
+            batteryControl1.Size = new Size(906, 556);
             batteryControl1.TabIndex = 0;
             batteryControl1.SimulationStarted += batteryControl1_SimulationStarted;
             batteryControl1.SimulationStopped += batteryControl1_SimulationStopped;
@@ -145,7 +147,7 @@
             panel_log.Dock = DockStyle.Fill;
             panel_log.Location = new Point(0, 0);
             panel_log.Name = "panel_log";
-            panel_log.Size = new Size(1156, 232);
+            panel_log.Size = new Size(1360, 201);
             panel_log.TabIndex = 0;
             // 
             // logControl1
@@ -153,7 +155,7 @@
             logControl1.Dock = DockStyle.Fill;
             logControl1.Location = new Point(0, 0);
             logControl1.Name = "logControl1";
-            logControl1.Size = new Size(1156, 232);
+            logControl1.Size = new Size(1360, 201);
             logControl1.TabIndex = 0;
             // 
             // menuStrip1
@@ -163,7 +165,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { 파일FToolStripMenuItem, 편집EToolStripMenuItem, 보기FtoolStripMenuItem, 시뮬레이션SToolStripMenuItem, 도움말HtoolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(1156, 28);
+            menuStrip1.Size = new Size(1360, 28);
             menuStrip1.TabIndex = 3;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -271,12 +273,14 @@
             // 
             AutoScaleDimensions = new SizeF(9F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1156, 704);
+            ClientSize = new Size(1360, 783);
             Controls.Add(menuStrip1);
             Controls.Add(splitContainer1);
             Controls.Add(statusStrip1);
+            IsMdiContainer = true;
             Name = "Form1";
             Text = "EV Simulator";
+            Load += Form1_Load;
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();

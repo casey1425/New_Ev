@@ -97,5 +97,10 @@ namespace Ev
         {
             logControl1.AddLog("시뮬레이션 종료 버튼 클릭");
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
