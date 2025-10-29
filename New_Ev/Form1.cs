@@ -1,106 +1,98 @@
-using New_Ev;
-using System.Security.Cryptography;
+ï»¿using System;
+using System.IO;
+using System.Threading;
+using System.Windows.Forms;
 
-namespace Ev
+namespace New_Ev
 {
     public partial class Form1 : Form
     {
+        private Ev? evLogic;
+        private CancellationTokenSource? cts;
 
         public Form1()
         {
-            InitializeComponent();
+            InitializeComponent(); // ì´ í•œ ì¤„ì´ ë””ìì´ë„ˆê°€ ë§Œë“  ëª¨ë“  ê²ƒì„ ë¶ˆëŸ¬ì˜µë‹ˆë‹¤.
+            this.FormClosing += Form1_FormClosing;
         }
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        // 'evControl1'ì˜ StartSimulationClicked ì´ë²¤íŠ¸ í•¸ë“¤ëŸ¬
+        private async void evControl1_StartSimulationClicked(object sender, EventArgs e)
         {
-
-        }
-
-        private void splitContainer2_Panel2_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
-        private void »õ½Ã¹Ä·¹ÀÌ¼ÇToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            batteryControl1.ResetSimulation();
-            MessageBox.Show("ÃÊ±âÈ­ ¿Ï·á!");
-            logControl1?.AddLog("»õ ½Ã¹Ä·¹ÀÌ¼Ç ½ÃÀÛ");
-        }
-
-        private void ½ÃÀÛToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            batteryControl1.StartSimulation();
-            logControl1?.AddLog("ÃæÀü ½Ã¹Ä·¹ÀÌ¼Ç ½ÃÀÛ");
-        }
-
-        private void ÁßÁöToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            batteryControl1.StopSimulation();
-            logControl1?.AddLog("ÃæÀü ½Ã¹Ä·¹ÀÌ¼Ç ÁßÁö");
-        }
-
-        private void ÀúÀåToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-            saveFileDialog.Filter = "ÅØ½ºÆ® ÆÄÀÏ (*.txt)|*.txt|¸ğµç ÆÄÀÏ (*.*)|*.*";
-            saveFileDialog.Title = "¼³Á¤ ÀúÀå";
-            saveFileDialog.FileName = "battery_settings.txt";
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            if (evLogic != null)
             {
-                string settings = batteryControl1.GetCurrentSettings();
-                try
-                {
-                    System.IO.File.WriteAllText(saveFileDialog.FileName, settings);
-                    MessageBox.Show("¼³Á¤ÀÌ ÀúÀåµÇ¾ú½À´Ï´Ù.");
-                    logControl1.AddLog("¼³Á¤ ÆÄÀÏ ÀúÀå: " + saveFileDialog.FileName);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("ÆÄÀÏ ÀúÀå Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù: " + ex.Message);
-                    logControl1.AddLog("ÆÄÀÏ ÀúÀå ¿À·ù: " + ex.Message);
-                }
+                logControl1.AddLog("ì´ë¯¸ ì‹œë®¬ë ˆì´ì…˜ì´ ì‹¤í–‰ ì¤‘ì…ë‹ˆë‹¤.");
+                return;
+            }
+
+            cts = new CancellationTokenSource();
+
+            try
+            {
+                batteryControl1.ResetDisplay();
+                logControl1.ClearLog();
+
+                // evControl1ì˜ UpdateStateëŠ” EvControl.csì— publicìœ¼ë¡œ ë§Œë“¤ì–´ì•¼ í•©ë‹ˆë‹¤.
+                evLogic = new Ev("eth", "en0", "00:11:22:33:44:55");
+                evLogic.OnLog += (message) => logControl1.AddLog(message);
+                evLogic.OnStateChanged += (newState) => evControl1.UpdateState(newState);
+                evLogic.OnBatteryUpdate += (updatedBattery, tick) => batteryControl1.UpdateDisplay(updatedBattery, tick);
+
+                evLogic.SetInitialBatteryState(batteryControl1.StartSOC);
+                evLogic.SetChargingInputs(batteryControl1.InputVoltage, batteryControl1.InputCurrent);
+
+                await evLogic.StartSessionAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                logControl1.AddLog("ì‚¬ìš©ìì— ì˜í•´ ì‹œë®¬ë ˆì´ì…˜ì´ ì¤‘ë‹¨ë˜ì—ˆìŠµë‹ˆë‹¤.");
+            }
+            catch (Exception ex)
+            {
+                logControl1.AddLog($"[Form1 ì˜¤ë¥˜] ì‹œë®¬ë ˆì´ì…˜ ì¤‘ ì˜¤ë¥˜ ë°œìƒ: {ex.Message}");
+            }
+            finally
+            {
+                evLogic = null;
+                evControl1.UpdateState("ì„¸ì…˜ ì¢…ë£Œë¨");
             }
         }
 
-        private void Á¾·áToolStripMenuItem_Click(object sender, EventArgs e)
+        // í¼ì´ ë‹«í ë•Œ ì‹¤í–‰ë˜ëŠ” ì´ë²¤íŠ¸
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            cts?.Cancel();
+        }
+
+        #region MenuStrip Event Handlers (ì´ ë¶€ë¶„ì€ ì´ì „ê³¼ ë™ì¼)
+        private void ìƒˆì‹œë®¬ë ˆì´ì…˜ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // ...
+        }
+        private void ì €ì¥ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // ...
+        }
+        private void ì¢…ë£ŒToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
+        #endregion
 
-        private void ÀÏ½ÃÁ¤ÁöToolStripMenuItem_Click(object sender, EventArgs e)
+        private void btnLoadConfig_Click(object sender, EventArgs e)
         {
-            batteryControl1.PauseSimulation();
-            logControl1?.AddLog("ÃæÀü ½Ã¹Ä·¹ÀÌ¼Ç ÀÏ½ÃÁ¤Áö");
-        }
+            if (evLogic == null)
+            {
+                MessageBox.Show("ë¨¼ì € 'EV ì—°ê²° ì‹œì‘' ë²„íŠ¼ì„ ëˆŒëŸ¬ ì‹œë®¬ë ˆì´ì…˜ì„ ì‹œì‘í•´ì£¼ì„¸ìš”.");
+                return;
+            }
 
-        private void ¸®¼ÂToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            batteryControl1.ResetSimulation();
-            MessageBox.Show("ÃÊ±âÈ­ ¿Ï·á!");
-            logControl1?.AddLog("½Ã¹Ä·¹ÀÌ¼Ç ¸®¼Â");
-        }
+            var newConfig = new Dictionary<string, object>
+    {
+        { "battery_capacity", 75000.0 }
+    };
 
-        private void batteryControl1_SimulationStarted(object sender, EventArgs e)
-        {
-            logControl1.AddLog("½Ã¹Ä·¹ÀÌ¼Ç ½ÃÀÛ ¹öÆ° Å¬¸¯");
-        }
-
-        private void batteryControl1_SimulationStopped(object sender, EventArgs e)
-        {
-            logControl1.AddLog("½Ã¹Ä·¹ÀÌ¼Ç Á¾·á ¹öÆ° Å¬¸¯");
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
+            evLogic.Load(newConfig);
         }
     }
 }

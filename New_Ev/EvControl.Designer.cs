@@ -1,6 +1,6 @@
 ﻿namespace New_Ev
 {
-    partial class BatteryControl
+    partial class EvControl
     {
         /// <summary> 
         /// 필수 디자이너 변수입니다.
@@ -28,16 +28,44 @@
         /// </summary>
         private void InitializeComponent()
         {
+            btnStartEv = new Button();
+            lblEvState = new Label();
             SuspendLayout();
             // 
-            // BatteryControl
+            // btnStartEv
+            // 
+            btnStartEv.Location = new Point(199, 84);
+            btnStartEv.Name = "btnStartEv";
+            btnStartEv.Size = new Size(118, 29);
+            btnStartEv.TabIndex = 0;
+            btnStartEv.Text = "Ev 연결 시작";
+            btnStartEv.UseVisualStyleBackColor = true;
+            btnStartEv.Click += btnStartEv_Click;
+            // 
+            // lblEvState
+            // 
+            lblEvState.AutoSize = true;
+            lblEvState.Location = new Point(237, 344);
+            lblEvState.Name = "lblEvState";
+            lblEvState.Size = new Size(54, 20);
+            lblEvState.TabIndex = 1;
+            lblEvState.Text = "대기중";
+            // 
+            // EvControl
             // 
             AutoScaleDimensions = new SizeF(9F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            Name = "BatteryControl";
+            Controls.Add(lblEvState);
+            Controls.Add(btnStartEv);
+            Name = "EvControl";
+            Size = new Size(559, 442);
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
+
+        private Button btnStartEv;
+        private Label lblEvState;
     }
 }

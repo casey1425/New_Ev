@@ -16,6 +16,16 @@ namespace New_Ev
         {
             InitializeComponent();
         }
+
+        public void ClearLog()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(ClearLog));
+                return;
+            }
+            richTextBox1.Clear();
+        }
         public void AddLog(string message)
         {
             if (this.InvokeRequired)

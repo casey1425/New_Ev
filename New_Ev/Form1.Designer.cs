@@ -1,4 +1,4 @@
-﻿namespace Ev
+﻿namespace New_Ev
 {
     partial class Form1
     {
@@ -32,10 +32,11 @@
             splitContainer1 = new SplitContainer();
             splitContainer2 = new SplitContainer();
             panel_tree = new Panel();
+            evControl1 = new EvControl();
             panel_battery = new Panel();
-            batteryControl1 = new New_Ev.BatteryControl();
+            batteryControl1 = new BatteryControl();
             panel_log = new Panel();
-            logControl1 = new New_Ev.LogControl();
+            logControl1 = new LogControl();
             menuStrip1 = new MenuStrip();
             파일FToolStripMenuItem = new ToolStripMenuItem();
             새시뮬레이션ToolStripMenuItem = new ToolStripMenuItem();
@@ -52,6 +53,7 @@
             중지ToolStripMenuItem = new ToolStripMenuItem();
             리셋ToolStripMenuItem = new ToolStripMenuItem();
             도움말HtoolStripMenuItem = new ToolStripMenuItem();
+            btnLoadConfig = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -60,6 +62,7 @@
             splitContainer2.Panel1.SuspendLayout();
             splitContainer2.Panel2.SuspendLayout();
             splitContainer2.SuspendLayout();
+            panel_tree.SuspendLayout();
             panel_battery.SuspendLayout();
             panel_log.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -105,7 +108,6 @@
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(panel_battery);
-            splitContainer2.Panel2.Paint += splitContainer2_Panel2_Paint;
             splitContainer2.Size = new Size(1360, 556);
             splitContainer2.SplitterDistance = 450;
             splitContainer2.TabIndex = 0;
@@ -113,11 +115,22 @@
             // panel_tree
             // 
             panel_tree.BackColor = SystemColors.AppWorkspace;
+            panel_tree.Controls.Add(btnLoadConfig);
+            panel_tree.Controls.Add(evControl1);
             panel_tree.Dock = DockStyle.Fill;
             panel_tree.Location = new Point(0, 0);
             panel_tree.Name = "panel_tree";
             panel_tree.Size = new Size(450, 556);
             panel_tree.TabIndex = 0;
+            // 
+            // evControl1
+            // 
+            evControl1.Dock = DockStyle.Fill;
+            evControl1.Location = new Point(0, 0);
+            evControl1.Name = "evControl1";
+            evControl1.Size = new Size(450, 556);
+            evControl1.TabIndex = 0;
+            evControl1.StartSimulationClicked += evControl1_StartSimulationClicked;
             // 
             // panel_battery
             // 
@@ -138,8 +151,6 @@
             batteryControl1.Name = "batteryControl1";
             batteryControl1.Size = new Size(906, 556);
             batteryControl1.TabIndex = 0;
-            batteryControl1.SimulationStarted += batteryControl1_SimulationStarted;
-            batteryControl1.SimulationStopped += batteryControl1_SimulationStopped;
             // 
             // panel_log
             // 
@@ -181,14 +192,12 @@
             새시뮬레이션ToolStripMenuItem.Name = "새시뮬레이션ToolStripMenuItem";
             새시뮬레이션ToolStripMenuItem.Size = new Size(187, 26);
             새시뮬레이션ToolStripMenuItem.Text = "새 시뮬레이션";
-            새시뮬레이션ToolStripMenuItem.Click += 새시뮬레이션ToolStripMenuItem_Click;
             // 
             // 저장ToolStripMenuItem
             // 
             저장ToolStripMenuItem.Name = "저장ToolStripMenuItem";
             저장ToolStripMenuItem.Size = new Size(187, 26);
             저장ToolStripMenuItem.Text = "저장";
-            저장ToolStripMenuItem.Click += 저장ToolStripMenuItem_Click;
             // 
             // 로그내보내기ToolStripMenuItem
             // 
@@ -201,7 +210,6 @@
             종료ToolStripMenuItem.Name = "종료ToolStripMenuItem";
             종료ToolStripMenuItem.Size = new Size(187, 26);
             종료ToolStripMenuItem.Text = "종료";
-            종료ToolStripMenuItem.Click += 종료ToolStripMenuItem_Click;
             // 
             // 편집EToolStripMenuItem
             // 
@@ -240,34 +248,40 @@
             시작ToolStripMenuItem.Name = "시작ToolStripMenuItem";
             시작ToolStripMenuItem.Size = new Size(152, 26);
             시작ToolStripMenuItem.Text = "시작";
-            시작ToolStripMenuItem.Click += 시작ToolStripMenuItem_Click;
             // 
             // 일시정지ToolStripMenuItem
             // 
             일시정지ToolStripMenuItem.Name = "일시정지ToolStripMenuItem";
             일시정지ToolStripMenuItem.Size = new Size(152, 26);
             일시정지ToolStripMenuItem.Text = "일시정지";
-            일시정지ToolStripMenuItem.Click += 일시정지ToolStripMenuItem_Click;
             // 
             // 중지ToolStripMenuItem
             // 
             중지ToolStripMenuItem.Name = "중지ToolStripMenuItem";
             중지ToolStripMenuItem.Size = new Size(152, 26);
             중지ToolStripMenuItem.Text = "중지";
-            중지ToolStripMenuItem.Click += 중지ToolStripMenuItem_Click;
             // 
             // 리셋ToolStripMenuItem
             // 
             리셋ToolStripMenuItem.Name = "리셋ToolStripMenuItem";
             리셋ToolStripMenuItem.Size = new Size(152, 26);
             리셋ToolStripMenuItem.Text = "리셋";
-            리셋ToolStripMenuItem.Click += 리셋ToolStripMenuItem_Click;
             // 
             // 도움말HtoolStripMenuItem
             // 
             도움말HtoolStripMenuItem.Name = "도움말HtoolStripMenuItem";
             도움말HtoolStripMenuItem.Size = new Size(89, 24);
             도움말HtoolStripMenuItem.Text = "도움말(&H)";
+            // 
+            // btnLoadConfig
+            // 
+            btnLoadConfig.Location = new Point(131, 155);
+            btnLoadConfig.Name = "btnLoadConfig";
+            btnLoadConfig.Size = new Size(228, 29);
+            btnLoadConfig.TabIndex = 1;
+            btnLoadConfig.Text = "배터리 용량변경 (Load)";
+            btnLoadConfig.UseVisualStyleBackColor = true;
+            btnLoadConfig.Click += btnLoadConfig_Click;
             // 
             // Form1
             // 
@@ -280,7 +294,6 @@
             IsMdiContainer = true;
             Name = "Form1";
             Text = "EV Simulator";
-            Load += Form1_Load;
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
@@ -289,6 +302,7 @@
             splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
+            panel_tree.ResumeLayout(false);
             panel_battery.ResumeLayout(false);
             panel_log.ResumeLayout(false);
             menuStrip1.ResumeLayout(false);
@@ -323,5 +337,7 @@
         private ToolStripMenuItem 중지ToolStripMenuItem;
         private ToolStripMenuItem 리셋ToolStripMenuItem;
         private New_Ev.LogControl logControl1;
+        private EvControl evControl1;
+        private Button btnLoadConfig;
     }
 }

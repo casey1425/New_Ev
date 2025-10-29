@@ -11,7 +11,7 @@ namespace New_Ev
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Ev.Form1());
+            Application.Run(new New_Ev.Form1());
         }
     }
 }
