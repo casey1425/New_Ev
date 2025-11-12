@@ -28,9 +28,20 @@ namespace New_Ev
         }
         public void AddLog(string message)
         {
+            if (this.IsDisposed || this.Disposing)
+            {
+                return;
+            }
+
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action(() => AddLog(message)));
+                try
+                {
+                    this.Invoke(new Action(() => AddLog(message)));
+                }
+                catch (ObjectDisposedException)
+                {
+                }
                 return;
             }
             string log = $"[{DateTime.Now:HH:mm:ss}] {message}\n";

@@ -35,10 +35,10 @@ namespace New_Ev
         public void SlacStartMatching() => Log("SLAC 매칭 시작");
         public bool SlacMatched() { Log("SLAC 매칭 성공 여부 확인 (성공으로 반환)"); return true; }
         public void V2gSetMode(int mode) => Log($"V2G 모드 설정: {mode}");
+        public void V2gStartSession() => Log("V2G 세션 시작");
         public void V2gEvSetConfiguration(Dictionary<string, object> config) => Log("V2G EV 구성 설정 완료");
         public void V2gSetDCChargingParameters(Dictionary<string, object> parameters) => Log("V2G DC 충전 파라미터 설정 완료");
         public void V2gSetACChargingParameters(Dictionary<string, object> parameters) => Log("V2G AC 충전 파라미터 설정 완료");
-        public void V2gStartSession() => Log("V2G 세션 시작");
         public void V2gStopSession() => Log("V2G 세션 중지");
         public void V2gStartCableCheck() => Log("V2G 케이블 체크 시작");
         public void V2gStartPreCharging() => Log("V2G 사전 충전 시작");
@@ -59,8 +59,8 @@ namespace New_Ev
                 { "protocol", "ISO_15118_2" },
                 { "session_id", "ABCDEF123456" },
                 { "evse_id", "KR-EVSE-007" },
-                { "payment_method", "EIM" }, // 결제 방식 예시
-                { "energy_transfer_mode", "DC_extended" } // 충전 모드 예시
+                { "payment_method", "EIM" },
+                { "energy_transfer_mode", "DC_extended" }
             };
         }
         public Dictionary<string, object> V2gEvParseDCChargeParametersChanged(byte[] data)
@@ -93,9 +93,9 @@ namespace New_Ev
         {
             Log("다단계 충전 스케줄을 생성합니다 (10초->25A, 20초->40A).");
             var profile = new ChargingProfile();
-            profile.Entries.Add(new ProfileEntry { Start = 0, Power = 10000 });
-            profile.Entries.Add(new ProfileEntry { Start = 10, Power = 5000 });
-            profile.Entries.Add(new ProfileEntry { Start = 20, Power = 8000 });
+            profile.Entries.Add(new ChargingProfileEntry { Start = 0, Power = 10000 });
+            profile.Entries.Add(new ChargingProfileEntry { Start = 10, Power = 5000 });
+            profile.Entries.Add(new ChargingProfileEntry { Start = 20, Power = 8000 });
             return profile;
         }
 
@@ -106,41 +106,17 @@ namespace New_Ev
             messageSequence++;
             switch (messageSequence)
             {
-                case 1:
-                    Log("가짜 'SessionStarted' 메시지(0xC0)를 보냅니다.");
-                    return (0xC0, Array.Empty<byte>());
-                case 2:
-                    Log("가짜 'CableCheckReady' 메시지(0xC4)를 보냅니다.");
-                    return (0xC4, Array.Empty<byte>());
-                case 3:
-                    Log("가짜 'CableCheckFinished' 메시지(0xC5)를 보냅니다.");
-                    return (0xC5, Array.Empty<byte>());
-                case 4:
-                    Log("가짜 'PreChargingReady' 메시지(0xC6)를 보냅니다.");
-                    return (0xC6, Array.Empty<byte>());
-                case 5:
-                    Log("가짜 'ChargingReady' 메시지(0xC7)를 보냅니다.");
-                    return (0xC7, Array.Empty<byte>());
-                case 6:
-                    Log("가짜 'ChargingStarted' 메시지(0xC8)를 보냅니다.");
-                    return (0xC8, Array.Empty<byte>());
-                case 7:
-                    Log("가짜 'DCChargeParametersChanged' 메시지(0xC1)를 보냅니다.");
-                    return (0xC1, Array.Empty<byte>());
-                case 8:
-                    Log("가짜 'ACChargeParametersChanged' 메시지(0xC2)를 보냅니다.");
-                    return (0xC2, Array.Empty<byte>());
-                case 9:
-                    Log("가짜 'ScheduleReceived' 메시지(0xC3)를 보냅니다.");
-                    return (0xC3, Array.Empty<byte>());
-                case 12: // 10, 11 건너뛰고 12번째에 알림 발생
-                    Log("가짜 'NotificationReceived' 메시지(0xCC)를 보냅니다.");
-                    return (0xCC, Array.Empty<byte>());
+                case 1: Log("가짜 'SessionStarted' 메시지(0xC0)를 보냅니다."); return (0xC0, Array.Empty<byte>());
+                case 2: Log("가짜 'CableCheckReady' 메시지(0xC4)를 보냅니다."); return (0xC4, Array.Empty<byte>());
+                case 3: Log("가짜 'CableCheckFinished' 메시지(0xC5)를 보냅니다."); return (0xC5, Array.Empty<byte>());
+                case 4: Log("가짜 'PreChargingReady' 메시지(0xC6)를 보냅니다."); return (0xC6, Array.Empty<byte>());
+                case 5: Log("가짜 'ChargingReady' 메시지(0xC7)를 보냅니다."); return (0xC7, Array.Empty<byte>());
+                case 6: Log("가짜 'ChargingStarted' 메시지(0xC8)를 보냅니다."); return (0xC8, Array.Empty<byte>());
+                case 7: Log("가짜 'DCChargeParametersChanged' 메시지(0xC1)를 보냅니다."); return (0xC1, Array.Empty<byte>());
+                case 8: Log("가짜 'ACChargeParametersChanged' 메시지(0xC2)를 보냅니다."); return (0xC2, Array.Empty<byte>());
+                case 9: Log("가짜 'ScheduleReceived' 메시지(0xC3)를 보냅니다."); return (0xC3, Array.Empty<byte>());
+                case 12: Log("가짜 'NotificationReceived' 메시지(0xCC)를 보냅니다."); return (0xCC, Array.Empty<byte>());
                 default:
-                    // TimeoutException 대신 "메시지 없음" 신호 반환 (개선된 방식)
-                    // Log("더 이상 보낼 메시지 없음 (Timeout 대신 0x00 반환).");
-                    // return (0x00, Array.Empty<byte>());
-                    // 또는 TimeoutException 유지 (현재 Ev.cs 코드와 호환)
                     throw new TimeoutException("No more messages from EVSE.");
             }
         }
