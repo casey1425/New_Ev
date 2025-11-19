@@ -32,6 +32,8 @@
             splitContainer1 = new SplitContainer();
             splitContainer2 = new SplitContainer();
             panel_tree = new Panel();
+            btnStop = new Button();
+            btnLoadConfig = new Button();
             evControl1 = new EvControl();
             panel_battery = new Panel();
             batteryControl1 = new BatteryControl();
@@ -53,7 +55,6 @@
             중지ToolStripMenuItem = new ToolStripMenuItem();
             리셋ToolStripMenuItem = new ToolStripMenuItem();
             도움말HtoolStripMenuItem = new ToolStripMenuItem();
-            btnLoadConfig = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -115,6 +116,7 @@
             // panel_tree
             // 
             panel_tree.BackColor = SystemColors.AppWorkspace;
+            panel_tree.Controls.Add(btnStop);
             panel_tree.Controls.Add(btnLoadConfig);
             panel_tree.Controls.Add(evControl1);
             panel_tree.Dock = DockStyle.Fill;
@@ -122,6 +124,26 @@
             panel_tree.Name = "panel_tree";
             panel_tree.Size = new Size(450, 556);
             panel_tree.TabIndex = 0;
+            // 
+            // btnStop
+            // 
+            btnStop.Location = new Point(205, 122);
+            btnStop.Name = "btnStop";
+            btnStop.Size = new Size(94, 29);
+            btnStop.TabIndex = 2;
+            btnStop.Text = "중지";
+            btnStop.UseVisualStyleBackColor = true;
+            btnStop.Click += btnStop_Click;
+            // 
+            // btnLoadConfig
+            // 
+            btnLoadConfig.Location = new Point(131, 155);
+            btnLoadConfig.Name = "btnLoadConfig";
+            btnLoadConfig.Size = new Size(228, 29);
+            btnLoadConfig.TabIndex = 1;
+            btnLoadConfig.Text = "배터리 용량변경 (Load)";
+            btnLoadConfig.UseVisualStyleBackColor = true;
+            btnLoadConfig.Click += btnLoadConfig_Click;
             // 
             // evControl1
             // 
@@ -131,6 +153,7 @@
             evControl1.Size = new Size(450, 556);
             evControl1.TabIndex = 0;
             evControl1.StartSimulationClicked += evControl1_StartSimulationClicked;
+            evControl1.Load += evControl1_Load;
             // 
             // panel_battery
             // 
@@ -151,6 +174,7 @@
             batteryControl1.Name = "batteryControl1";
             batteryControl1.Size = new Size(906, 556);
             batteryControl1.TabIndex = 0;
+            batteryControl1.Load += batteryControl1_Load;
             // 
             // panel_log
             // 
@@ -179,6 +203,7 @@
             menuStrip1.Size = new Size(1360, 28);
             menuStrip1.TabIndex = 3;
             menuStrip1.Text = "menuStrip1";
+            menuStrip1.ItemClicked += menuStrip1_ItemClicked;
             // 
             // 파일FToolStripMenuItem
             // 
@@ -273,16 +298,6 @@
             도움말HtoolStripMenuItem.Size = new Size(89, 24);
             도움말HtoolStripMenuItem.Text = "도움말(&H)";
             // 
-            // btnLoadConfig
-            // 
-            btnLoadConfig.Location = new Point(131, 155);
-            btnLoadConfig.Name = "btnLoadConfig";
-            btnLoadConfig.Size = new Size(228, 29);
-            btnLoadConfig.TabIndex = 1;
-            btnLoadConfig.Text = "배터리 용량변경 (Load)";
-            btnLoadConfig.UseVisualStyleBackColor = true;
-            btnLoadConfig.Click += btnLoadConfig_Click;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(9F, 20F);
@@ -339,5 +354,6 @@
         private New_Ev.LogControl logControl1;
         private EvControl evControl1;
         private Button btnLoadConfig;
+        private Button btnStop;
     }
 }
