@@ -8,7 +8,6 @@ namespace New_Ev
 {
     public partial class Form1 : Form
     {
-        // 멤버 변수 이름이 'evLogic' 입니다.
         private Ev? evLogic;
         private CancellationTokenSource? cts;
 
@@ -35,7 +34,7 @@ namespace New_Ev
                 logControl1.ClearLog();
 
                 // evLogic 객체 생성 (변수명 evLogic 사용)
-                evLogic = new Ev("eth", "en0", "00:11:22:33:44:55");
+                evLogic = new Ev("eth", "en0", "C4:93:00:47:CE:28");
 
                 // 이벤트 연결
                 evLogic.OnLog += (message) =>
