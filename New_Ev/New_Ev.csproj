@@ -16,12 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Documents\daskoreaMessenger\CH341_Demo\CH341_Demo\CH341_Demo.csproj">
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="BatteryControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

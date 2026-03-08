@@ -78,7 +78,7 @@ namespace New_Ev
                         Message = $"[Worker Error] {ex.Message}"
                     });
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(500);
             }
         }
     }

@@ -1,184 +1,176 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-using System.Threading;
+﻿using CH341;
 using New_Ev;
-using Microsoft.VisualBasic.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace New_Ev
 {
     public partial class Form1 : Form
     {
-        // ========================================================
-        // 1. 멤버 변수 선언
-        // ========================================================
         private RealWhitebeet _whitebeet;
         private PollingWorker _worker;
+
+        //2025.12.08    SPI 통신 처리를 위한 SPI device 추가
+        private CH341A spi_driver = new CH341A();
+        private WB_Frame device;
+
 
         public Form1()
         {
             InitializeComponent();
-
-            // 폼 종료 이벤트 연결
             this.FormClosing += Form1_FormClosing;
-        }
 
-        // ========================================================
-        // 2. [시작 버튼] 연결 및 초기화 명령 전송
-        // ========================================================
-        private void evControl1_StartSimulationClicked(object sender, EventArgs e)
-        {
-            // 중복 실행 방지
-            if (_worker != null)
+//2025.12.08    SPI 통신 처리를 분리
+            if (!spi_driver.OpenDevice())
             {
-                Log("이미 연결되어 있습니다.");
+                MessageBox.Show("Device is not detected");
                 return;
             }
+            device = new WB_Frame(spi_driver);
+            device.Event_Notifier += OnReceivedStatus;
+
+        }
+//2025.12.08 수신된 메시지 처리
+        private void OnReceivedStatus(object sender, WB_EventArgsStatus e)
+        {
+            //string msg = "status".PadRight(10);
+            //txtLog.AppendText($"{msg}:{get_hex_string(e.received_buf)}\r\n");
+        }
+        // [연결 버튼] 시작 및 단계별 초기화 (실패 시 즉시 중단)
+        private void evControl1_StartSimulationClicked(object sender, EventArgs e)
+        {
+            if (_worker != null) { Log("이미 연결되어 있습니다."); return; }
 
             try
             {
-                Log("하드웨어 연결 시도 중...");
+                Log("============== [연결 시작] ==============");
 
-                // 1. 하드웨어 객체 생성 (CH341A 연결)
+                // 1. 하드웨어 연결
                 _whitebeet = new RealWhitebeet("SPI", "CH341", "00:01:02:03:04:05");
                 _whitebeet.OnLog += (msg) => Log(msg);
-                Log("하드웨어(CH341A) 연결 성공.");
+                Log("하드웨어(CH341A) 초기화 성공.");
 
-                // 2. 워커(스레드) 객체 생성 및 하드웨어 주입
+                // 2. 워커 시작
                 _worker = new PollingWorker(_whitebeet);
-
-                // 3. [중요] 이벤트 연결 (구독)
-                // 워커가 데이터를 찾으면 Worker_OnDataReceived 함수가 실행됨
                 _worker.OnDataReceived += Worker_OnDataReceived;
-
-                // 4. 감시 스레드 시작
                 _worker.Start();
-                Log("감시 스레드 시작됨. (TX_Pending 확인 중...)");
+                Log("감시 스레드 시작됨.");
 
+                // 스레드 안정화 대기
                 Application.DoEvents();
-                Thread.Sleep(200);
+                Thread.Sleep(500);
 
-                Log(">> [초기화] 모듈 설정 시작...");
+                // ------------------------------------------------------------
+                // [초기화 시퀀스] 단계별 실행 (하나라도 실패하면 즉시 종료)
+                // ------------------------------------------------------------
 
-                // (1) Control Pilot (CP) 서비스 설정 (EV 모드 = 0)
-                _whitebeet.ControlPilotSetMode(0);
-                Thread.Sleep(100); // 명령 간 간격
+                Log(">> [Step 1] CP 모드 설정 (EV) 전송...");
+                // 성공 여부 확인 -> 실패 시 return
+                if (!_whitebeet.ControlPilotSetMode(0))
+                {
+                    Log(">> [중단] Step 1 실패! 하드웨어 연결(MISO/MOSI)을 점검하세요.");
+                    CleanUp(); // 자원 정리
+                    return;    // 함수 강제 종료 (다음 단계 실행 안 함)
+                }
+                Thread.Sleep(1000); // 성공했으면 잠시 대기 후 다음으로
 
-                // (2) Control Pilot 시작
-                _whitebeet.ControlPilotStart();
-                Thread.Sleep(100);
+                Log(">> [Step 2] CP 서비스 시작 전송...");
+                if (!_whitebeet.ControlPilotStart())
+                {
+                    Log(">> [중단] Step 2 실패! 모듈 상태를 확인하세요.");
+                    CleanUp();
+                    return;
+                }
+                Thread.Sleep(1000);
 
-                // (3) SLAC 서비스 시작 (EV 모드 = 0)
-                _whitebeet.SlacStart(0);
-                Thread.Sleep(100);
+                Log(">> [Step 3] SLAC 서비스 시작 전송...");
+                if (!_whitebeet.SlacStart(0))
+                {
+                    Log(">> [중단] Step 3 실패.");
+                    CleanUp();
+                    return;
+                }
+                Thread.Sleep(1000);
 
-                // (4) V2G 세션 시작 (여기서부터 본격적인 통신 시작)
-                _whitebeet.V2gStartSession();
+                Log(">> [Step 4] V2G 세션 시작 전송...");
+                if (!_whitebeet.V2gStartSession())
+                {
+                    Log(">> [중단] Step 4 실패.");
+                    CleanUp();
+                    return;
+                }
 
-                Log(">> [초기화] 모든 시작 명령 전송 완료. 응답 대기 중...");
+                // 모든 단계 통과 시
+                Log("============== [초기화 완료] ==============");
+                Log("모든 명령이 정상적으로 전송되었습니다. 응답 대기 중...");
 
-                if (!evControl1.IsDisposed)
-                    evControl1.UpdateState("연결됨 / 초기화 완료");
+                if (!evControl1.IsDisposed) evControl1.UpdateState("Connected");
             }
             catch (Exception ex)
             {
-                Log($"[연결 실패] {ex.Message}");
-                MessageBox.Show($"장치 연결에 실패했습니다.\n\n{ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                // 실패 시 자원 정리
+                Log($"[오류 발생] {ex.Message}");
+                MessageBox.Show($"연결 중 오류가 발생했습니다.\n\n{ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 CleanUp();
             }
         }
 
-        // ========================================================
-        // 3. [중지 버튼] 연결 해제 및 스레드 종료
-        // ========================================================
+        // [중지 버튼]
         private void btnStop_Click(object sender, EventArgs e)
         {
-            if (_worker == null)
-            {
-                Log("실행 중인 연결이 없습니다.");
-                return;
-            }
-
             Log("연결 종료 요청...");
             CleanUp();
             Log("연결이 종료되었습니다.");
 
             if (!evControl1.IsDisposed)
-                evControl1.UpdateState("연결 종료");
+                evControl1.UpdateState("Disconnected");
         }
 
-        // 자원 해제 공통 메서드
-        private void CleanUp()
-        {
-            if (_worker != null)
-            {
-                _worker.Stop();
-                _worker = null;
-            }
-
-            if (_whitebeet != null)
-            {
-                _whitebeet.Dispose();
-                _whitebeet = null;
-            }
-        }
-
-        // ========================================================
-        // 4. [이벤트 핸들러] 데이터 수신 처리 (스레드 -> UI)
-        // ========================================================
+        // 데이터 수신 핸들러
         private void Worker_OnDataReceived(object sender, WhitebeetEventArgs e)
         {
-            // 백그라운드 스레드에서 호출되므로 Invoke 필수
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => Worker_OnDataReceived(sender, e)));
                 return;
             }
 
-            // 에러 메시지 처리
             if (e.IsError)
             {
-                Log($"[오류] {e.Message}");
+                Log($"[Worker 오류] {e.Message}");
                 return;
             }
 
-            // 정상 데이터 수신 시 로그 출력 (Payload 내용도 보고 싶다면 여기서 처리)
             Log(e.Message);
 
-            // 수신된 StatusId(메시지 ID)에 따라 UI를 갱신하거나 다음 동작 수행
             switch (e.StatusId)
             {
-                case 0xC0: // Session Started (EV)
-                    Log(">> [이벤트] V2G 세션이 시작되었습니다!");
-                    if (!evControl1.IsDisposed) evControl1.UpdateState("Charging Session Started");
+                case 0xC0:
+                    Log(">> [이벤트] V2G 세션 시작됨!");
+                    if (!evControl1.IsDisposed) evControl1.UpdateState("Session Started");
                     break;
-
-                case 0x80: // SLAC Success
+                case 0x80:
                     Log(">> [이벤트] SLAC 매칭 성공!");
                     if (!evControl1.IsDisposed) evControl1.UpdateState("SLAC Matched");
-
-                    // SLAC이 성공하면 자동으로 V2G 매칭 프로세스 시작하도록 할 수도 있음
-                    // _whitebeet.SlacStartMatching(); 
                     break;
-
-                case 0x81: // SLAC Failed
+                case 0x81:
                     Log(">> [이벤트] SLAC 매칭 실패.");
                     break;
             }
         }
 
-        // ========================================================
-        // 5. 유틸리티 및 기타 이벤트
-        // ========================================================
+        // 자원 정리
+        private void CleanUp()
+        {
+            if (_worker != null) { _worker.Stop(); _worker = null; }
+            if (_whitebeet != null) { _whitebeet.Dispose(); _whitebeet = null; }
+        }
 
-        // 로그 출력 헬퍼
         private void Log(string msg)
         {
-            if (!logControl1.IsDisposed)
+            if (logControl1 != null && !logControl1.IsDisposed)
             {
-                // logControl1이 UserControl이라면 내부 메서드를 호출
                 if (logControl1.InvokeRequired)
                     logControl1.Invoke(new Action(() => logControl1.AddLog(msg)));
                 else
@@ -186,30 +178,10 @@ namespace New_Ev
             }
         }
 
-        // 폼 종료 시 정리
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            CleanUp();
-        }
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e) => CleanUp();
 
-        private void btnLoadConfig_Click(object sender, EventArgs e)
-        {
-            if (_whitebeet == null)
-            {
-                MessageBox.Show("먼저 시뮬레이션(하드웨어 연결)을 시작해주세요.");
-                return;
-            }
-
-            var newConfig = new Dictionary<string, object>
-            {
-                { "battery_capacity", 75000.0 }
-            };
-
-            // _whitebeet.V2gEvSetConfiguration(newConfig);
-            Log("설정 로드됨 (명령 전송은 구현 필요)");
-        }
-
-        // 빈 이벤트 핸들러들
+        // 기타 이벤트
+        private void btnLoadConfig_Click(object sender, EventArgs e) { }
         private void batteryControl1_Load(object sender, EventArgs e) { }
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e) { }
         private void evControl1_Load(object sender, EventArgs e) { }
